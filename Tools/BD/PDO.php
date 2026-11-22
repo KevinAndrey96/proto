@@ -1,8 +1,8 @@
 <?php 
-    $dbname = 'interwor_concurso';
-    $host = 'localhost';
-    $username= 'interwor_admin';
-    $password = 'Proto2018@@';
+    $dbname = getenv('DB_NAME') ?: 'proto_concurso';
+    $host = getenv('DB_HOST') ?: 'localhost';
+    $username = getenv('DB_USER') ?: 'proto_user';
+    $password = getenv('DB_PASSWORD') ?: 'proto_password';
  
     $options = array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'); 
      

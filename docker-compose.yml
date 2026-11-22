@@ -1,0 +1,34 @@
+services:
+  web:
+    image: php:8.1-apache
+    container_name: sweepstakes-promo-portal
+    restart: unless-stopped
+    ports:
+      - "8090:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: proto_concurso
+      DB_USER: proto_user
+      DB_PASSWORD: proto_password
+    volumes:
+      - .:/var/www/html
+    entrypoint: >
+      sh -c "docker-php-ext-install pdo pdo_mysql &&
+             docker-php-entrypoint apache2-foreground"
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.11
+    container_name: proto-mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: proto_concurso
+      MYSQL_USER: proto_user
+      MYSQL_PASSWORD: proto_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
