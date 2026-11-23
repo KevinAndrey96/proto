@@ -1,6 +1,6 @@
 <?php
 session_start();
-if(!$_SESSION["Active"]==true)
+if (empty($_SESSION["Active"]))
 {
 ?>
 <script type="text/javascript">

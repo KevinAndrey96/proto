@@ -1,6 +1,6 @@
 <?php
 session_start();
-if(@$_SESSION["Active"]==true)
+if (!empty($_SESSION["Active"]))
 {
 ?>
 <script type="text/javascript">
@@ -31,7 +31,9 @@ if(isset($_POST["Token"]))
             }
             if($cont==1)
             {
-                session_start();
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
                 $_SESSION["Usuario"]=$user;
                 $_SESSION["Nombre"]=$Name;
                 $_SESSION["Active"]=true;

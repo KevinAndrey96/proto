@@ -1,34 +1,56 @@
 services:
   web:
     image: php:8.1-apache
-    container_name: sweepstakes-promo-portal
+    container_name: proto-promo-app
     restart: unless-stopped
     ports:
-      - "8090:80"
+      - "${APP_PORT:-8092}:80"
     environment:
       DB_HOST: db
-      DB_NAME: proto_concurso
-      DB_USER: proto_user
-      DB_PASSWORD: proto_password
+      DB_NAME: ${DB_NAME:-proto_concurso}
+      DB_USER: ${DB_USER:-proto_user}
+      DB_PASSWORD: ${DB_PASSWORD:-proto_password}
+      WINNING_CODE: ${WINNING_CODE:-WINNER}
     volumes:
       - .:/var/www/html
     entrypoint: >
       sh -c "docker-php-ext-install pdo pdo_mysql &&
              docker-php-entrypoint apache2-foreground"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: mariadb:10.11
-    container_name: proto-mariadb
+    container_name: proto-promo-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: proto_concurso
-      MYSQL_USER: proto_user
-      MYSQL_PASSWORD: proto_password
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ${DB_NAME:-proto_concurso}
+      MYSQL_USER: ${DB_USER:-proto_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-proto_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+    ports:
+      - "${DB_PORT:-3311}:3306"
     volumes:
       - db_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: proto-promo-pma
+    restart: unless-stopped
+    ports:
+      - "${PMA_PORT:-8093}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    depends_on:
+      - db
 
 volumes:
   db_data:
